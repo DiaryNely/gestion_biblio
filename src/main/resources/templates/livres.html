@@ -1,1 +1,110 @@
-<h1>TEST</h1>
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Catalogue des Livres - Bibliothèque</title>
+    
+    <!-- Ajout des balises meta pour le token CSRF, c'est crucial pour le JavaScript -->
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+    <style>
+        body { font-family: sans-serif; padding: 2rem; background-color: #f8f9fa; }
+        .livre-card { background-color: white; border: 1px solid #e0e0e0; padding: 1rem; margin-bottom: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        h1, h3, h4 { color: #333; }
+        ul { list-style: none; padding: 0; }
+        .exemplaire { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border-bottom: 1px solid #f1f1f1; }
+        .exemplaire:last-child { border-bottom: none; }
+        .btn-emprunter { background-color: #28a745; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; transition: background-color 0.2s; }
+        .btn-emprunter:hover { background-color: #218838; }
+        .btn-emprunter:disabled { background-color: #ccc; cursor: not-allowed; }
+        #toast { position: fixed; top: 20px; right: 20px; padding: 1rem; border-radius: 5px; color: white; z-index: 1000; display: none; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        #toast.success { background-color: #28a745; }
+        #toast.error { background-color: #dc3545; }
+    </style>
+</head>
+<body>
+    <h1>Catalogue des Livres</h1>
+    <p>
+        Connecté en tant que <strong sec:authentication="name">Utilisateur</strong>.
+        <form th:action="@{/logout}" method="post" style="display: inline; margin-left: 1rem;">
+            <button type="submit">Se déconnecter</button>
+        </form>
+    </p>
+
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+    
+    <div th:each="livre : ${livres}" class="livre-card">
+        <h3 th:text="${livre.titre}">Titre du Livre</h3>
+        <h4>Exemplaires :</h4>
+        <ul>
+            <li th:each="exemplaire : ${livre.exemplaires}" class="exemplaire">
+                <span>
+                    Code: <b th:text="${exemplaire.codeInventaire}">CODE001</b> - 
+                    État: <span th:text="${exemplaire.etatPhysique.getValeur()}">Bon</span>
+                </span>
+                <button th:if="${exemplaire.disponible}"
+                        class="btn-emprunter"
+                        th:attr="data-id=${exemplaire.id}"
+                        onclick="emprunter(this)">
+                    Emprunter
+                </button>
+                <span th:if="!${exemplaire.disponible}" style="color: #999;">Indisponible</span>
+            </li>
+            <li th:if="${#lists.isEmpty(livre.exemplaires)}">
+                <span>Aucun exemplaire enregistré pour ce livre.</span>
+            </li>
+        </ul>
+    </div>
+    
+    <div id="toast"></div>
+
+    <script>
+        function emprunter(button) {
+            const exemplaireId = button.getAttribute('data-id');
+            if (!confirm(`Confirmez-vous l'emprunt de cet exemplaire (ID: ${exemplaireId}) ?`)) {
+                return;
+            }
+
+            // Récupération du token et du header CSRF depuis les balises meta
+            const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+            fetch(`/api/prets/emprunter/${exemplaireId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [header]: token
+                }
+            })
+            .then(response => {
+                // On vérifie si la réponse est OK (status 200-299)
+                if (response.ok) {
+                    return response.json();
+                }
+                // Si la réponse n'est pas OK, on la traite comme une erreur
+                return response.json().then(errorData => Promise.reject(errorData));
+            })
+            .then(data => {
+                showToast(data.message || 'Emprunt réussi !', 'success');
+                button.disabled = true;
+                button.textContent = 'Emprunté !';
+            })
+            .catch(errorData => {
+                const errorMessage = errorData.error || 'Une erreur inconnue est survenue.';
+                showToast(errorMessage, 'error');
+                console.error('Erreur:', errorData);
+            });
+        }
+
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = type;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 5000);
+        }
+    </script>
+    
+</body>
+</html>
