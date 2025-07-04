@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Accueil</title>
+     <style> body { font-family: sans-serif; padding: 2rem; } </style>
+</head>
+<body>
+    <h1>Bienvenue sur le tableau de bord de la bibliothèque !</h1>
+    <p>Vous êtes bien connecté.</p>
+
+    <!-- Formulaire pour se déconnecter -->
+    <form th:action="@{/logout}" method="post">
+        <button type="submit">Se déconnecter</button>
+    </form>
+</body>
+</html>

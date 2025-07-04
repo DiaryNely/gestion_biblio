@@ -1,0 +1,13 @@
+package mg.biblio.gestion_biblio.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class LivreEmpruntStatsDTO {
+    private String titre;
+    private long nombreEmprunts;
+}

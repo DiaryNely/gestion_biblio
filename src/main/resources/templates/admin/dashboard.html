@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Administrateur</title>
+    <!-- Ajout de Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f8f9fa; color: #343a40; margin: 0; padding: 1.5rem; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .header h1 { margin: 0; }
+        .user-info { font-size: 0.9rem; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+        .card { background-color: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+        .card-header { display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid #e9ecef; padding-bottom: 1rem; margin-bottom: 1rem; }
+        .card-header i { font-size: 1.5rem; color: #007bff; width: 30px; text-align: center; }
+        .card-header h3 { margin: 0; font-size: 1.1rem; color: #495057; }
+        .stat-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; font-size: 0.95rem; }
+        .stat-item:not(:last-child) { border-bottom: 1px solid #f1f3f5; }
+        .stat-label { color: #6c757d; }
+        .stat-value { font-weight: 600; font-size: 1.2rem; }
+        .stat-value.danger { color: #dc3545; }
+        .table-card { grid-column: 1 / -1; } /* La table prend toute la largeur */
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 0.75rem; border-bottom: 1px solid #e9ecef; }
+        th { color: #6c757d; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Tableau de Bord</h1>
+        <div class="user-info">
+            Connecté en tant que <strong sec:authentication="name"></strong>
+            <form th:action="@{/logout}" method="post" style="display: inline; margin-left: 1rem;">
+                <button type="submit" style="background: none; border: none; color: #007bff; cursor: pointer; padding: 0;">Déconnexion</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Carte Livres -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fa-solid fa-book"></i>
+                <h3>Catalogue</h3>
+            </div>
+            <div class="stat-item"><span class="stat-label">Titres Uniques</span> <span class="stat-value" th:text="${dashboardStats.nombreTotalLivres}">0</span></div>
+            <div class="stat-item"><span class="stat-label">Total Exemplaires</span> <span class="stat-value" th:text="${dashboardStats.nombreTotalExemplaires}">0</span></div>
+            <div class="stat-item"><span class="stat-label">Disponibles</span> <span class="stat-value" th:text="${dashboardStats.nombreExemplairesDisponibles}">0</span></div>
+            <div class="stat-item"><span class="stat-label">Empruntés</span> <span class="stat-value" th:text="${dashboardStats.nombreExemplairesEmpruntes}">0</span></div>
+            <div class="stat-item"><span class="stat-label">Abîmés / Perdus</span> <span class="stat-value danger" th:text="${dashboardStats.nombreExemplairesAbimes}">0</span></div>
+        </div>
+
+        <!-- Carte Prêts -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fa-solid fa-right-left"></i>
+                <h3>Activité des Prêts</h3>
+            </div>
+            <div class="stat-item"><span class="stat-label">Prêts en cours</span> <span class="stat-value" th:text="${dashboardStats.nombrePretsEnCours}">0</span></div>
+            <div class="stat-item"><span class="stat-label">Prêts en retard</span> <span class="stat-value danger" th:text="${dashboardStats.nombrePretsEnRetard}">0</span></div>
+        </div>
+
+        <!-- Carte Utilisateurs -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fa-solid fa-users"></i>
+                <h3>Utilisateurs</h3>
+            </div>
+            <div class="stat-item"><span class="stat-label">Comptes créés</span> <span class="stat-value" th:text="${dashboardStats.nombreTotalUtilisateurs}">0</span></div>
+            <div class="stat-item"><span class="stat-label">Adhérents</span> <span class="stat-value" th:text="${dashboardStats.nombreTotalAdherents}">0</span></div>
+        </div>
+
+        <!-- Carte Livres les plus populaires -->
+        <div class="card table-card">
+            <div class="card-header">
+                <i class="fa-solid fa-star"></i>
+                <h3>Top 5 des livres les plus empruntés</h3>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Titre du Livre</th>
+                        <th>Nombre d'emprunts</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="livreStat : ${dashboardStats.livresPlusEmpruntes}">
+                        <td th:text="${livreStat.titre}">Titre exemple</td>
+                        <td th:text="${livreStat.nombreEmprunts}">10</td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(dashboardStats.livresPlusEmpruntes)}">
+                        <td colspan="2">Aucun emprunt enregistré pour le moment.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>

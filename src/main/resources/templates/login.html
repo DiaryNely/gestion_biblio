@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Gestion Bibliothèque</title>
+    <!-- Un peu de style pour que ce soit plus joli -->
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .login-container { background-color: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 300px; }
+        h1 { text-align: center; color: #333; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.5rem; }
+        input { width: 100%; padding: 0.5rem; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { width: 100%; padding: 0.7rem; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .alert { padding: 1rem; margin-bottom: 1rem; border-radius: 4px; }
+        .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <h1>Bibliothèque</h1>
+
+    <!-- Affiche un message d'erreur si la connexion échoue -->
+    <div th:if="${param.error}" class="alert alert-danger">
+        Email ou mot de passe incorrect.
+    </div>
+
+    <!-- Affiche un message de succès après déconnexion -->
+    <div th:if="${param.logout}" class="alert alert-success">
+        Vous avez été déconnecté.
+    </div>
+
+    <!-- Le formulaire de connexion. L'action doit pointer vers /login (géré par Spring Security) -->
+    <form th:action="@{/login}" method="post">
+        <div class="form-group">
+            <label for="username">Email</label>
+            <!-- L'input DOIT avoir le name="username" -->
+            <input type="email" id="username" name="username" required autofocus>
+        </div>
+        <div class="form-group">
+            <label for="password">Mot de passe</label>
+            <!-- L'input DOIT avoir le name="password" -->
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit">Se connecter</button>
+    </form>
+</div>
+</body>
+</html>

@@ -41,3 +41,7 @@ INSERT INTO abonnement (id_adherent, type_abonnement, date_debut) VALUES
     'permanent',
     CURRENT_DATE
 );
+
+
+
+UPDATE exemplaire SET etat_physique = 'ABIME' WHERE etat_physique = 'Abîmé';
